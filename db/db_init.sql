@@ -48,8 +48,10 @@ CREATE TABLE UDZIAL (
 CREATE TABLE RUCH (
     id_rozgrywki NUMBER NOT NULL,
     id_gracza NUMBER NOT NULL,
+    nr_ruchu NUMBER NOT NULL, /* do ustalenia kolejności ruchów */
     opis_ruchu VARCHAR(50) NOT NULL,
-    FOREIGN KEY (id_rozgrywki, id_gracza) REFERENCES UDZIAL(id_rozgrywki, id_gracza)
+    FOREIGN KEY (id_rozgrywki, id_gracza) REFERENCES UDZIAL(id_rozgrywki, id_gracza),
+    CONSTRAINT RUCH_pk PRIMARY KEY (id_rozgrywki, nr_ruchu)
 );
 
 COMMIT;
