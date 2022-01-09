@@ -21,10 +21,11 @@
           <a class="navbar-brand" href="{{ url_for('gry') }}">gry</a>
           <a class="navbar-brand" href="{{ url_for('gracze') }}">gracze</a>
           <a class="navbar-brand" href="{{ url_for('ranking') }}">ranking</a>
-          </div>
         </div>
-      </nav>
+    </nav>
 
+    {% block content %}
+    {% endblock %}
 
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
