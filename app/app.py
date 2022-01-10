@@ -70,11 +70,15 @@ def ranking_gry(game_id):
                "GRACZ grc JOIN UDZIAL ud ON grc.id = ud.id_gracza "
                "JOIN ROZGRYWKA ro ON ud.id_rozgrywki = ro.id "
                "JOIN GRA gra ON ro.id_gry = gra.id "
-               "WHERE gra.id = " + game_id)
-    cursor.execute(request)
+               "WHERE gra.id = :g_id")
+    cursor.execute(request, g_id=game_id)
     data = np.array(cursor.fetchall())
-    names = [name + " ranking???" for name in data[:, 1]]
-    links = ["" for name in names]
+    if data.shape[0] > 0:
+        names = [name + " ranking???" for name in data[:, 1]]
+        links = ["" for name in names]
+    else:
+        names = []
+        links = []
     return render_template('list_of_links.html', names=names, links=links)
 
 
@@ -86,6 +90,7 @@ def gracze():
 @app.route("/rank")
 def ranking():
     return "ranking"
+
 
 if __name__ == '__main__':
 
