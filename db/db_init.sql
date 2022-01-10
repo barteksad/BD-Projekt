@@ -26,6 +26,7 @@ CREATE TABLE GRA (
     id NUMBER GENERATED ALWAYS as IDENTITY(START with 1 INCREMENT by 1),
     nazwa VARCHAR(50),
     ilu_graczy NUMBER NOT NULL, --- jakiś trigger na to pewnie
+    formula_rankingu VARCHAR(50) NOT NULL,
     CONSTRAINT GRA_pk PRIMARY KEY (id)
 );
 
