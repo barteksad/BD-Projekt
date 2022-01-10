@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% for name in names %}
+<a href="{{ links[loop.index - 1] }}"> {{ name }} </a> <br>
+{% endfor %}
+
+{% endblock %}
