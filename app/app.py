@@ -22,6 +22,7 @@ if sys.platform.startswith("darwin"):
 elif sys.platform.startswith("win32"):
     cx_Oracle.init_oracle_client(lib_dir=r"c:\oracle\instantclient_19_8")
 
+
 def start_pool():
 
     pool_min = 4
@@ -42,9 +43,6 @@ def start_pool():
 
     return pool
 
-#Server na stałe zalogowany czy użytkownik loguje się do bazy danych jak w 'naukowcach'
-#connection = ???
-
 
 @app.route("/")
 def hello_world():
@@ -63,34 +61,75 @@ def gry():
     return render_template('list_of_links.html', names=names, links=links)
 
 
-@app.route("/ranking/gry/<game_id>")
+def get_game_info(connection, game_id):
+    game_info_request = "SELECT nazwa, ilu_graczy, formula_rankingu FROM GRA " \
+                        "WHERE id = :g_id"
+
+    cursor = connection.cursor()
+    cursor.execute(game_info_request, g_id=game_id)
+    data = cursor.fetchall()
+    if len(data) == 0:
+        raise ValueError("GAME NOT FOUND")
+    return data[0]
+
+
+def get_game_ranking(connection, game_id, ranking_formula):
+    players_request = "SELECT grc.id, grc.nazwa FROM " \
+                       "GRACZ grc JOIN UDZIAL ud ON grc.id = ud.id_gracza " \
+                       "JOIN ROZGRYWKA ro ON ud.id_rozgrywki = ro.id " \
+                       "JOIN GRA gra ON ro.id_gry = gra.id " \
+                       "WHERE gra.id = :g_id"
+
+    count_games_request = "SELECT COUNT(u.czy_wygral) FROM " \
+                          "GRACZ g JOIN UDZIAL u ON g.id = u.id_gracza " \
+                          "JOIN ROZGRYWKA r ON u.id_rozgrywki = r.id " \
+                          "WHERE r.id_gry = :g_id " \
+                          "AND g.id = :p_id " \
+                          "AND u.czy_wygral = :win"
+
+    cursor = connection.cursor()
+    eval_ranking = Parser().parse(ranking_formula)
+
+    def get_player_ranking(player_id):
+        cursor.execute(count_games_request, g_id=game_id, p_id=player_id, win=1)
+        wins = cursor.fetchall()[0][0]
+        cursor.execute(count_games_request, g_id=game_id, p_id=player_id, win=0)
+        looses = cursor.fetchall()[0][0]
+        return eval_ranking.evaluate({'w': wins, 'l': looses})
+
+    cursor.execute(players_request, g_id=game_id)
+    data = np.array(cursor.fetchall())
+    if data.shape[0] == 0:
+        return []
+    ranking_points = [[get_player_ranking(p_id)] for p_id in data[:, 0]]
+    ranking = np.append(data, ranking_points, axis=1)
+    return np.flipud(ranking[np.argsort(ranking[:, -1])])
+
+
+@app.route("/gry/<game_id>")
 def ranking_gry(game_id):
     connection = pool.acquire()
-    cursor = connection.cursor()
-    request = ("SELECT grc.id, grc.nazwa FROM "
-               "GRACZ grc JOIN UDZIAL ud ON grc.id = ud.id_gracza "
-               "JOIN ROZGRYWKA ro ON ud.id_rozgrywki = ro.id "
-               "JOIN GRA gra ON ro.id_gry = gra.id "
-               "WHERE gra.id = :g_id")
-    cursor.execute(request, g_id=game_id)
-    data = np.array(cursor.fetchall())
-    if data.shape[0] > 0:
-        names = [name + " ranking???" for name in data[:, 1]]
-        links = ["" for name in names]
+    game_name, how_many_players, ranking_formula = \
+        get_game_info(connection, game_id)
+    ranking = get_game_ranking(connection, game_id, ranking_formula)
+    if len(ranking) > 0:
+        links = [url_for('ranking_gracza', player_id=p_id) for p_id in ranking[:, 0]]
+        content = ranking[:, 1:]
     else:
-        names = []
         links = []
-    return render_template('list_of_links.html', names=names, links=links)
+        content = []
+    return render_template('game_page.html',
+                           table_label=['Player', 'Points'],
+                           table_content=content, table_links=links)
 
 
 @app.route("/gracze")
 def gracze():
     return "gracze"
 
-
-@app.route("/rank")
-def ranking():
-    return "ranking"
+@app.route("/gracze/<player_id>")
+def ranking_gracza(player_id):
+    return "gracz " + str(player_id)
 
 
 if __name__ == '__main__':
