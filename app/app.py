@@ -3,6 +3,7 @@ from flask import render_template
 from flask import url_for
 import cx_Oracle
 import numpy as np
+from py_expression_eval import Parser
 
 import os
 import sys

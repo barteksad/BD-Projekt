@@ -1,3 +1,4 @@
 cx-Oracle==8.3.0
 Flask==2.0.2
 numpy==1.22.0
+py_expression_eval==0.3.14
