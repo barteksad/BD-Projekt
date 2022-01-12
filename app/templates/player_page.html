@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+<!-- p_name - player name -->
+<!-- p_type - player type -->
+<!-- g_ids - ids of played games -->
+<!-- g_names - names of played games -->
+<!-- game_links - links for game ranking -->
+
+
+{% block content %}
+
+<div class="jumbotron">
+    <h1 class="display-4">{{p_name}}</h1>
+    <hr class="my-4">
+    <p>typ : {{p_type}}</p>
+</div>
+
+<table class="table table-hover">
+    <thead>
+    <tr>
+        <th scope="col">Gry:</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in game_list %}
+    <tr class="clickable" onclick="window.location.href='{{ game_links[loop.index - 1] }}';">
+        <td>{{ row }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

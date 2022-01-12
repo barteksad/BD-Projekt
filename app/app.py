@@ -137,13 +137,19 @@ def gracze_info(player_id):
     data = np.array(cursor.fetchall())
 
     p_name, p_type = data[0, 1], data[0 ,2]
+    p_type = cursor.execute("SELECT nazwa FROM TYPY_GRACZY WHERE id = :p_type", p_type=p_type).fetchall()[0][0]
 
     cursor.execute(player_games_request, p_id=player_id)
     data = np.array(cursor.fetchall())
 
-    g_ids, g_names = data[:, 0], data[:, 1]
+    if len(data) > 0:
+        game_links = [url_for('ranking_gry', game_id=g_id) for g_id in data[:, 0]]
+    else:
+        game_links = []
 
-    return ' '.join([str(i) for i in [p_name, p_type, g_ids, g_names]])
+    return render_template('player_page.html',
+                            p_name=p_name, p_type=p_type,
+                            game_list=data[:, 1], game_links=game_links)
 
 @app.route("/gracze")
 def gracze():
