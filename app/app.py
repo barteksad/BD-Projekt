@@ -124,7 +124,26 @@ def ranking_gry(game_id):
 
 @app.route("/gracze_info/<player_id>")
 def gracze_info(player_id):
-    return str(player_id)
+    player_info_request  = "SELECT id, nazwa, typ FROM GRACZ WHERE id = :p_id ORDER BY id"
+
+    player_games_request = "SELECT gra.id, gra.nazwa FROM GRA gra " \
+                           "JOIN ROZGRYWKA roz ON gra.id = roz.id_gry " \
+                           "JOIN UDZIAL ud ON ud.id_rozgrywki = roz.id " \
+                           "WHERE ud.id_gracza = :p_id"
+
+    connection = pool.acquire()
+    cursor = connection.cursor()
+    cursor.execute(player_info_request, p_id=player_id)
+    data = np.array(cursor.fetchall())
+
+    p_name, p_type = data[0, 1], data[0 ,2]
+
+    cursor.execute(player_games_request, p_id=player_id)
+    data = np.array(cursor.fetchall())
+
+    g_ids, g_names = data[:, 0], data[:, 1]
+
+    return ' '.join([str(i) for i in [p_name, p_type, g_ids, g_names]])
 
 @app.route("/gracze")
 def gracze():
