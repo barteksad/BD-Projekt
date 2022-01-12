@@ -122,10 +122,25 @@ def ranking_gry(game_id):
                            table_label=['Player', 'Points'],
                            table_content=content, table_links=links)
 
+@app.route("/gracze_info/<player_id>")
+def gracze_info(player_id):
+    return str(player_id)
 
 @app.route("/gracze")
 def gracze():
-    return "gracze"
+    players_info_request = "SELECT id, nazwa FROM GRACZ ORDER BY id"
+
+    connection = pool.acquire()
+    cursor = connection.cursor()
+    cursor.execute(players_info_request)
+    data = np.array(cursor.fetchall())
+
+    names = data[:, 1]
+    ids = data[:, 0]
+    links = [url_for('gracze_info', player_id=id) for id in ids]
+
+    return render_template('list_of_links.html', names=names, links=links)
+
 
 @app.route("/gracze/<player_id>")
 def ranking_gracza(player_id):
@@ -135,4 +150,4 @@ def ranking_gracza(player_id):
 if __name__ == '__main__':
 
     pool = start_pool()
-    app.run(port=int(os.environ.get('PORT', '8081')))
+    app.run(port=int(os.environ.get('PORT', '8081')), debug=True)
