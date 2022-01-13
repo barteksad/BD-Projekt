@@ -74,7 +74,7 @@ def get_game_info(connection, game_id):
 
 
 def get_game_ranking(connection, game_id, ranking_formula):
-    players_request = "SELECT grc.id, grc.nazwa FROM " \
+    players_request = "SELECT DISTINCT(grc.id), grc.nazwa FROM " \
                        "GRACZ grc JOIN UDZIAL ud ON grc.id = ud.id_gracza " \
                        "JOIN ROZGRYWKA ro ON ud.id_rozgrywki = ro.id " \
                        "JOIN GRA gra ON ro.id_gry = gra.id " \
@@ -126,7 +126,7 @@ def ranking_gry(game_id):
 def gracze_info(player_id):
     player_info_request  = "SELECT id, nazwa, typ FROM GRACZ WHERE id = :p_id ORDER BY id"
 
-    player_games_request = "SELECT gra.id, gra.nazwa FROM GRA gra " \
+    player_games_request = "SELECT DISTINCT(gra.id), gra.nazwa FROM GRA gra " \
                            "JOIN ROZGRYWKA roz ON gra.id = roz.id_gry " \
                            "JOIN UDZIAL ud ON ud.id_rozgrywki = roz.id " \
                            "WHERE ud.id_gracza = :p_id"
