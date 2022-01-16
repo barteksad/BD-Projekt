@@ -74,34 +74,21 @@ def get_game_info(connection, game_id):
 
 
 def get_game_ranking(connection, game_id, ranking_formula):
-    players_request = "SELECT DISTINCT(grc.id), grc.nazwa FROM " \
-                       "GRACZ grc JOIN UDZIAL ud ON grc.id = ud.id_gracza " \
-                       "JOIN ROZGRYWKA ro ON ud.id_rozgrywki = ro.id " \
-                       "JOIN GRA gra ON ro.id_gry = gra.id " \
-                       "WHERE gra.id = :g_id"
-
-    count_games_request = "SELECT COUNT(u.czy_wygral) FROM " \
-                          "GRACZ g JOIN UDZIAL u ON g.id = u.id_gracza " \
-                          "JOIN ROZGRYWKA r ON u.id_rozgrywki = r.id " \
-                          "WHERE r.id_gry = :g_id " \
-                          "AND g.id = :p_id " \
-                          "AND u.czy_wygral = :win"
+    players_request = "SELECT grc.id, grc.nazwa , COUNT(DISTINCT win.id_rozgrywki), COUNT(DISTINCT loos.id_rozgrywki) FROM " \
+                      "GRACZ grc JOIN UDZIAL ud ON grc.id = ud.id_gracza " \
+                      "JOIN ROZGRYWKA ro ON ud.id_rozgrywki = ro.id " \
+                      "JOIN GRA gra ON ro.id_gry = gra.id " \
+                      "LEFT JOIN (SELECT id_rozgrywki, id_gracza FROM UDZIAL WHERE czy_wygral = 1) win ON win.id_gracza = grc.id " \
+                      "LEFT JOIN (SELECT id_rozgrywki, id_gracza FROM UDZIAL WHERE czy_wygral = 0) loos ON loos.id_gracza = grc.id " \
+                      "WHERE gra.id = :g_id GROUP BY grc.id, grc.nazwa"
 
     cursor = connection.cursor()
     eval_ranking = Parser().parse(ranking_formula)
-
-    def get_player_ranking(player_id):
-        cursor.execute(count_games_request, g_id=game_id, p_id=player_id, win=1)
-        wins = cursor.fetchall()[0][0]
-        cursor.execute(count_games_request, g_id=game_id, p_id=player_id, win=0)
-        looses = cursor.fetchall()[0][0]
-        return eval_ranking.evaluate({'w': wins, 'l': looses})
-
     cursor.execute(players_request, g_id=game_id)
     data = np.array(cursor.fetchall())
     if data.shape[0] == 0:
         return []
-    ranking_points = [[get_player_ranking(p_id)] for p_id in data[:, 0]]
+    ranking_points = [[eval_ranking.evaluate({'w': int(row[2]), 'l': int(row[3])})] for row in data]
     ranking = np.append(data, ranking_points, axis=1)
     return np.flipud(ranking[np.argsort(ranking[:, -1])])
 
@@ -114,7 +101,7 @@ def ranking_gry(game_id):
     ranking = get_game_ranking(connection, game_id, ranking_formula)
     if len(ranking) > 0:
         links = [url_for('ranking_gracza', player_id=p_id) for p_id in ranking[:, 0]]
-        content = ranking[:, 1:]
+        content = ranking[:, [1, 4]]
     else:
         links = []
         content = []
