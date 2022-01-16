@@ -1,7 +1,6 @@
 from flask import Flask
 from flask import render_template
 from flask import url_for
-import cx_Oracle
 import numpy as np
 from py_expression_eval import Parser
 
@@ -100,7 +99,7 @@ def ranking_gry(game_id):
         get_game_info(connection, game_id)
     ranking = get_game_ranking(connection, game_id, ranking_formula)
     if len(ranking) > 0:
-        links = [url_for('ranking_gracza', player_id=p_id) for p_id in ranking[:, 0]]
+        links = [url_for('gracze_info', player_id=p_id) for p_id in ranking[:, 0]]
         content = ranking[:, [1, 4]]
     else:
         links = []
@@ -155,11 +154,6 @@ def gracze():
     links = [url_for('gracze_info', player_id=id) for id in ids]
 
     return render_template('list_of_links.html', names=names, links=links)
-
-
-@app.route("/gracze/<player_id>")
-def ranking_gracza(player_id):
-    return "gracz " + str(player_id)
 
 
 if __name__ == '__main__':
