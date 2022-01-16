@@ -1,11 +1,19 @@
 {% extends "base.html" %}
-<!-- table_label -->
-<!-- table_content -->
-<!-- table_links - links for rows of the table -->
+<!-- g_name - nazwa gry -->
+<!-- g_desc - opis gry -->
+<!-- p_no - ilość graczy biorąca udział w rozgrywce -->
+<!-- table_label - nazwy kolumn opisujących gracza -->
+<!-- table_content - opisy graczy -->
+<!-- table_links - linki do stron graczy -->
 
 {% block content %}
-<!--{% for name in names %}-->
-<!--{% endfor %}-->
+
+<div class="jumbotron">
+    <h1 class="display-4">{{g_name}}</h1>
+    <p class="lead"> {{g_desc}} </p>
+    <hr class="my-4">
+    <p>gracze : {{p_no}}</p>
+</div>
 
 <table class="table table-hover">
     <thead>

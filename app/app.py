@@ -119,6 +119,9 @@ def ranking_gry(game_id):
         links = []
         content = []
     return render_template('game_page.html',
+                           g_name=game_name,
+                           g_desc="",
+                           p_no=how_many_players,
                            table_label=['Player', 'Points'],
                            table_content=content, table_links=links)
 
