@@ -12,7 +12,7 @@
       crossorigin="anonymous"
     />
 
-    <title>Hello, world!</title>
+    <title> {% block title %} Hello, world! {% endblock %} </title>
   </head>
   <body>
 
@@ -20,6 +20,7 @@
         <div class="container-fluid">
           <a class="navbar-brand" href="{{ url_for('gry') }}">gry</a>
           <a class="navbar-brand" href="{{ url_for('gracze') }}">gracze</a>
+          <a class="navbar-brand" href="{{ url_for('gracze_dodaj') }}">dodaj gracza</a>
         </div>
     </nav>
 

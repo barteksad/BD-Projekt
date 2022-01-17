@@ -1,6 +1,8 @@
 from flask import Flask
 from flask import render_template
 from flask import url_for
+from flask import request
+from flask import redirect
 import numpy as np
 from py_expression_eval import Parser
 from collections import defaultdict
@@ -205,6 +207,40 @@ def gracze():
     links = [url_for('gracze_info', player_id=id) for id in ids]
 
     return render_template('list_of_links.html', names=names, links=links)
+
+
+@app.route("/gracze/add")
+def gracze_dodaj():
+    player_types_request = "SELECT nazwa, id FROM TYPY_GRACZY"
+
+    connection = pool.acquire()
+    cursor = connection.cursor()
+    cursor.execute(player_types_request)
+    data = np.array(cursor.fetchall())
+
+    return render_template("add_player.html", p_types=data)
+
+
+@app.route("/gracze/add/dodawanie", methods=['POST'])
+def dodawanie_gracza():
+    new_player_insert = "INSERT INTO GRACZ (nazwa, typ) VALUES (:name, :type)"
+
+    p_type = request.form['p_type']
+    p_name = request.form['p_name']
+
+    if not p_type:
+        return "nie wybrano typu"
+    if not p_name:
+        return "podano pustą nazwę"
+    try:
+        connection = pool.acquire()
+        cursor = connection.cursor()
+        cursor.execute(new_player_insert, (p_name, p_type))
+        connection.commit()
+    except cx_Oracle.DatabaseError:
+        return "Database Error"
+
+    return redirect(url_for('gracze'))
 
 
 if __name__ == '__main__':

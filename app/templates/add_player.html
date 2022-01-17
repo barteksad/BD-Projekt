@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+<!-- p_types - typy graczy -->
+
+{% block content %}
+<div class="row justify-content-md-center">
+    <form class="col-3 text-center" action="{{url_for('dodawanie_gracza')}}" method="post">
+        <select class="row p-2 form-control" name="p_type" id="p_type">
+            <option selected hidden value="">Wybierz typ gracza</option>
+            {% for type in p_types %}
+            <option value="{{type[1]}}"> {{type[0]}} </option>
+            {% endfor %}
+        </select>
+        <div class="row p-2">
+            <label for="p_name">Nazwa:</label>
+            <input type="text" id="p_name" name="p_name">
+        </div>
+        <button class="row p-2 btn btn-primary" type="submit"> send </button>
+    </form>
+</div>
+
+{% endblock %}
