@@ -4,6 +4,7 @@
 <!-- g_ids - ids of played games -->
 <!-- g_names - names of played games -->
 <!-- game_links - links for game ranking -->
+<!-- games_history - list of played games with links -->
 
 
 {% block content %}
@@ -24,6 +25,20 @@
     {% for row in game_list %}
     <tr class="clickable" onclick="window.location.href='{{ game_links[loop.index - 1] }}';">
         <td>{{ row }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<table class="table table-hover">
+    <thead>
+    <tr>
+        <th scope="col">Rozgrywki:</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in games_history %}
+    <tr class="{{row[3]}}" onclick="window.location.href='{{ row[0] }}';">
+        <td>{{ row[1] }} , {{row[2]}}</td>
     </tr>
     {% endfor %}
     </tbody>
