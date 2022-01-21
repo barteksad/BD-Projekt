@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+<!-- g_names - nazwy gier -->
+
+{% block content %}
+<div class="row justify-content-md-center">
+    <form class="col-3 text-center" action="{{url_for('zmien_formule')}}" method="post">
+        <select class="row p-2 form-control" name="g_id" id="g_id">
+            <option selected hidden value="">Wybierz grę</option>
+            {% for g_name in g_names %}
+            <option value="{{g_name[1]}}"> {{g_name[0]}} </option>
+            {% endfor %}
+        </select>
+        <div class="row p-2">
+            <label for="f_text">Nowa formuła:</label>
+            <input type="text" id="f_text" name="f_text">
+        </div>
+        <button class="row p-2 btn btn-primary" type="submit"> send </button>
+    </form>
+</div>
+
+{% endblock %}

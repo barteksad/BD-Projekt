@@ -168,10 +168,14 @@ def ranking_gry(game_id):
         plays_table_content = []
         plays_table_links = []
 
+    ranking_formula = ranking_formula.replace("w", " wygrane ")
+    ranking_formula = ranking_formula.replace("l", " przegrane ")
+
     return render_template('game_page.html',
                            g_name=game_name,
                            g_desc="",
                            p_no=how_many_players,
+                           rank_formula=ranking_formula,
                            players_table_label=['Player', 'Points'],
                            players_table_content=content,
                            players_table_links=links,
@@ -231,6 +235,52 @@ def gracze():
 
     return render_template('list_of_links.html', names=names, links=links)
 
+@app.route("/gry/change_formula")
+def zmiana_formuly():
+    games_names_request = "SELECT nazwa, id FROM GRA"
+
+    connection = pool.acquire()
+    cursor = connection.cursor()
+    cursor.execute(games_names_request)
+    data = np.array(cursor.fetchall())
+
+    return render_template("change_game_formula.html", g_names=data)
+
+def is_formula_valid(formula):
+    eval_ranking = Parser().parse(formula)
+
+    try:
+        eval_ranking.evaluate({'w' : 123, "l" : 321})
+    except:
+        return False
+
+    return True
+
+@app.route("/gry/change_formula/change", methods=['POST'])
+def zmien_formule():
+    change_fomula_update = "UPDATE GRA " \
+                           "SET formula_rankingu = :f_text " \
+                           "WHERE id = :g_id "
+
+    g_id = request.form['g_id']
+    f_text  = request.form['f_text']
+
+    if not g_id:
+        return "Nie wybrano gry"
+    if not f_text:
+        "Nie wprowadzono formuły"
+    if not is_formula_valid(f_text):
+        return "Wprowadzono złą formułę"
+
+    try:
+        connection = pool.acquire()
+        cursor = connection.cursor()
+        cursor.execute(change_fomula_update, (f_text, g_id))
+        connection.commit()
+    except cx_Oracle.DatabaseError:
+        return "Database Error"
+
+    return redirect(url_for('ranking_gry', game_id=g_id))
 
 @app.route("/gracze/add")
 def gracze_dodaj():
