@@ -183,14 +183,16 @@ def gracze_info(player_id):
     if len(data) > 0:
         game_links = [url_for('ranking_gry', game_id=g_id)
                       for g_id in data[:, 0]]
+        game_list = data[:, 1]
     else:
         game_links = []
+        game_list = []
 
     games_history = get_player_games_history(connection, player_id)
 
     return render_template('player_page.html',
                            p_name=p_name, p_type=p_type,
-                           game_list=data[:, 1], game_links=game_links, games_history=games_history)
+                           game_list=game_list, game_links=game_links, games_history=games_history)
 
 
 @app.route("/gracze")
