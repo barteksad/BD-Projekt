@@ -155,6 +155,7 @@ def ranking_gry(game_id):
                            g_name=game_name,
                            g_desc="",
                            p_no=how_many_players,
+                           rank_formula=ranking_formula,
                            table_label=['Player', 'Points'],
                            table_content=content, table_links=links)
 
