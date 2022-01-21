@@ -137,6 +137,14 @@ def get_player_games_history(connection, player_id):
     return data
 
 
+def get_game_plays_history(connection, game_id):
+    game_games_request = "SELECT id FROM ROZGRYWKA WHERE id_gry = :g_id"
+
+    cursor = connection.cursor()
+    cursor.execute(game_games_request, g_id=game_id)
+    return np.array(cursor.fetchall())
+
+
 @app.route("/gry/<game_id>")
 def ranking_gry(game_id):
     connection = pool.acquire()
@@ -151,12 +159,25 @@ def ranking_gry(game_id):
         links = []
         content = []
 
+    games_history = get_game_plays_history(connection, game_id)
+    if len(games_history) > 0:
+        plays_table_content = games_history[:, 0:1]
+        plays_table_links = [url_for('play_stats', play_id=play_id)
+                             for play_id in games_history[:, 0]]
+    else:
+        plays_table_content = []
+        plays_table_links = []
+
     return render_template('game_page.html',
                            g_name=game_name,
                            g_desc="",
                            p_no=how_many_players,
-                           table_label=['Player', 'Points'],
-                           table_content=content, table_links=links)
+                           players_table_label=['Player', 'Points'],
+                           players_table_content=content,
+                           players_table_links=links,
+                           plays_table_label=['PLay ID'],
+                           plays_table_content=plays_table_content,
+                           plays_table_links=plays_table_links)
 
 
 @app.route("/gracze_info/<player_id>")
