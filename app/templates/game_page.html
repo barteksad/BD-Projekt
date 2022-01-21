@@ -6,6 +6,12 @@
 <!-- table_label - nazwy kolumn opisujących gracza -->
 <!-- table_content - opisy graczy -->
 <!-- table_links - linki do stron graczy -->
+<!-- players_table_label - nazwy kolumn opisujących gracza -->
+<!-- players_table_content - opisy graczy -->
+<!-- players_table_links - linki do stron graczy -->
+<!-- plays_table_label - nazwy kolumn opisujących rozgrywki -->
+<!-- plays_table_content - opisy rozgrywek -->
+<!-- plays_table_links - linki do stron rozgrywek -->
 
 {% block content %}
 
@@ -16,23 +22,49 @@
     <p>gracze : {{p_no}}</p>
 </div>
 
-<table class="table table-hover">
-    <thead>
-    <tr>
-        {% for l in table_label %}
-        <th scope="col">{{ l }}</th>
-        {% endfor %}
-    </tr>
-    </thead>
-    <tbody>
-    {% for row in table_content %}
-    <tr class="clickable" onclick="window.location.href='{{ table_links[loop.index - 1] }}';">
-        {% for element in row %}
-        <td>{{ element }}</td>
-        {% endfor %}
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
+<div class="row">
 
+    <div class="col-6">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                {% for l in players_table_label %}
+                <th scope="col">{{ l }}</th>
+                {% endfor %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in players_table_content %}
+            <tr class="clickable" onclick="window.location.href='{{ players_table_links[loop.index - 1] }}';">
+                {% for element in row %}
+                <td>{{ element }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-6">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                {% for l in plays_table_label %}
+                <th scope="col">{{ l }}</th>
+                {% endfor %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in plays_table_content %}
+            <tr class="clickable" onclick="window.location.href='{{ plays_table_links[loop.index - 1] }}';">
+                {% for element in row %}
+                <td>{{ element }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
 {% endblock %}
