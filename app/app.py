@@ -138,7 +138,7 @@ def get_player_games_history(connection, player_id):
 
 
 def get_game_plays_history(connection, game_id):
-    game_games_request = "SELECT id FROM ROZGRYWKA WHERE id_gry = :g_id"
+    game_games_request = "SELECT id, kiedy FROM ROZGRYWKA WHERE id_gry = :g_id"
 
     cursor = connection.cursor()
     cursor.execute(game_games_request, g_id=game_id)
@@ -159,11 +159,11 @@ def ranking_gry(game_id):
         links = []
         content = []
 
-    games_history = get_game_plays_history(connection, game_id)
-    if len(games_history) > 0:
-        plays_table_content = games_history[:, 0:1]
+    plays_history = get_game_plays_history(connection, game_id)
+    if len(plays_history) > 0:
+        plays_table_content = plays_history[:, 0:2]
         plays_table_links = [url_for('play_stats', play_id=play_id)
-                             for play_id in games_history[:, 0]]
+                             for play_id in plays_history[:, 0]]
     else:
         plays_table_content = []
         plays_table_links = []
@@ -179,7 +179,7 @@ def ranking_gry(game_id):
                            players_table_label=['Player', 'Points'],
                            players_table_content=content,
                            players_table_links=links,
-                           plays_table_label=['PLay ID'],
+                           plays_table_label=['PLay ID', 'Timestamp'],
                            plays_table_content=plays_table_content,
                            plays_table_links=plays_table_links)
 
@@ -234,6 +234,7 @@ def gracze():
     links = [url_for('gracze_info', player_id=id) for id in ids]
 
     return render_template('list_of_links.html', names=names, links=links)
+
 
 @app.route("/gry/change_formula")
 def zmiana_formuly():
