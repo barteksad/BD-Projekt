@@ -4,7 +4,7 @@ import numpy as np
 from user_secrets import PYTHON_USERNAME, PYTHON_PASSWORD
 
 connection = cx_Oracle.connect(user=PYTHON_USERNAME, password=PYTHON_PASSWORD,
-                               dsn="127.0.0.1:1700/LABS")
+                               dsn="//labora.mimuw.edu.pl/LABS")
 
 
 get_games_request = "SELECT nazwa, id FROM GRA"
