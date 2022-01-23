@@ -99,7 +99,46 @@ def get_game_ranking(connection, game_id, ranking_formula):
 
 @app.route("/play/<play_id>")
 def play_stats(play_id):
-    return ""
+
+    connection = pool.acquire()
+    cursor = connection.cursor()
+
+    cursor.execute(
+        "SELECT id_gry, kiedy FROM ROZGRYWKA WHERE id = :play_id", play_id=play_id)
+    game_id, play_date = cursor.fetchall()[0]
+
+    cursor.execute("SELECT nazwa FROM GRA WHERE id = :game_id",
+                   game_id=game_id)
+    game_name = np.array(cursor.fetchall())[0][0]
+
+    cursor.execute(
+        "SELECT id_gracza, czy_wygral FROM UDZIAL WHERE id_rozgrywki = :play_id", play_id=play_id)
+    players_list = np.array(cursor.fetchall())
+
+    game_link = url_for("ranking_gry", game_id=game_id)
+    players_links = [url_for('gracze_info', player_id=i)
+                     for i in players_list[:, 0]]
+
+    winner_id = players_list[players_list[:, 1] == 1][0][0]
+    winner_link = url_for("gracze_info", player_id=winner_id)
+    players_list = players_list[:, 0]
+
+    moves_query = "SELECT id_gracza, opis_ruchu FROM RUCH " \
+                  "WHERE id_rozgrywki = :play_id " \
+                  "ORDER BY nr_ruchu ASC " 
+
+    cursor.execute(moves_query, play_id=play_id)
+    moves = np.array(cursor.fetchall())
+
+    return render_template("play_page.html",
+                            game_name=game_name,
+                            game_link=game_link,
+                            play_date=play_date,
+                            winner_id=winner_id,
+                            winner_link=winner_link,
+                            players_list=players_list,
+                            players_links=players_links,
+                            moves=moves)
 
 
 def get_player_games_history(connection, player_id):
@@ -129,7 +168,7 @@ def get_player_games_history(connection, player_id):
 
     data = []
     for (play_id, game_name), players_ids in games_hist.items():
-        data.append((url_for("play_stats",play_id=play_id),
+        data.append((url_for("play_stats", play_id=play_id),
                      game_name,
                      "gracze : " + ", ".join([str(i) for i in players_ids]),
                     'link-success' if games_wins[play_id] == player_id else 'link-danger'))
@@ -179,7 +218,7 @@ def ranking_gry(game_id):
                            players_table_label=['Player', 'Points'],
                            players_table_content=content,
                            players_table_links=links,
-                           plays_table_label=['PLay ID', 'Timestamp'],
+                           plays_table_label=['Play ID', 'Timestamp'],
                            plays_table_content=plays_table_content,
                            plays_table_links=plays_table_links)
 
@@ -247,15 +286,17 @@ def zmiana_formuly():
 
     return render_template("change_game_formula.html", g_names=data)
 
+
 def is_formula_valid(formula):
     eval_ranking = Parser().parse(formula)
 
     try:
-        eval_ranking.evaluate({'w' : 123, "l" : 321})
+        eval_ranking.evaluate({'w': 123, "l": 321})
     except:
         return False
 
     return True
+
 
 @app.route("/gry/change_formula/change", methods=['POST'])
 def zmien_formule():
@@ -264,7 +305,7 @@ def zmien_formule():
                            "WHERE id = :g_id "
 
     g_id = request.form['g_id']
-    f_text  = request.form['f_text']
+    f_text = request.form['f_text']
 
     if not g_id:
         return "Nie wybrano gry"
@@ -282,6 +323,7 @@ def zmien_formule():
         return "Database Error"
 
     return redirect(url_for('ranking_gry', game_id=g_id))
+
 
 @app.route("/gracze/add")
 def gracze_dodaj():

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+<!-- play_id - id rozgrywki -->
+<!-- game_name - nazwa gry -->
+<!-- game_link - link gry -->
+<!-- play_date - data gry -->
+<!-- winner_id - id zwycięscy -->
+<!-- winner_link - link zwycięscy -->
+<!-- players_list - [id_gracza] -->
+<!-- players_links - linki graczy -->
+<!-- winner_link - link wygranego -->
+<!-- moves - lista ruchów -->
+
+{% block content %}
+
+<div class="jumbotron">
+  <h3 class="display-4">Rozgrywka {{play_id}}</h3>
+  <p class="clickable" onclick="window.location.href='{{ game_link }}';">
+    gra : {{game_name}}
+  </p>
+  <p class="clickable" onclick="window.location.href='{{ winner_link }}';">
+    wygrany : {{winner_id}}
+  </p>
+  <p class="lead">data : {{play_date}}</p>
+</div>
+
+<div class="row">
+  <div class="col-1">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th scope="col">gracze</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in players_list %}
+        <tr
+          class="clickable"
+          onclick="window.location.href='{{ players_links[loop.index - 1] }}';"
+        >
+          <td>{{ row }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="row">
+
+  <div class="col-2">
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">gracz</th>
+            <th scope="col">ruch</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in moves %}
+            {% for element in row %}
+            <td>{{ element }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
+
+{% endblock %}
