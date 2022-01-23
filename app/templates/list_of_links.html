@@ -1,8 +1,17 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% for name in names %}
-<a href="{{ links[loop.index - 1] }}"> {{ name }} </a> <br>
-{% endfor %}
+
+<div class="col-6">
+    <table class="table table-hover">
+        <tbody>
+        {% for name in names %}
+        <tr class="clickable" onclick="window.location.href='{{ links[loop.index - 1] }}';">
+            <td>{{ name }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 {% endblock %}
