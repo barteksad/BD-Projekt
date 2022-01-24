@@ -161,10 +161,10 @@ def get_player_games_history(connection, player_id):
     games_wins = dict()
 
     for row in data:
-        play_id, game_name, player_id, has_won = row
-        games_hist[(play_id, game_name)].append(player_id)
-        if has_won:
-            games_wins[play_id] = player_id
+        play_id, game_name, curr_player_id, has_won = row
+        games_hist[(play_id, game_name)].append(curr_player_id)
+        if has_won == '1':
+            games_wins[play_id] = curr_player_id
 
     data = []
     for (play_id, game_name), players_ids in games_hist.items():
