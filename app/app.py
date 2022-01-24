@@ -177,7 +177,8 @@ def get_player_games_history(connection, player_id):
 
 
 def get_game_plays_history(connection, game_id):
-    game_games_request = "SELECT id, kiedy FROM ROZGRYWKA WHERE id_gry = :g_id"
+    game_games_request = "SELECT id, kiedy FROM ROZGRYWKA WHERE id_gry = :g_id " \
+                         "ORDER BY kiedy DESC"
 
     cursor = connection.cursor()
     cursor.execute(game_games_request, g_id=game_id)
