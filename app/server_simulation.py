@@ -26,7 +26,7 @@ def print_array(arr):
         print(w)
 
 
-def generate_moves(players, how_many, game_id):
+def generate_results_and_moves(players, how_many, game_id):
     def random_on_chessboard():
         letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
         r = np.random.randint(0, 8, 2)
@@ -40,19 +40,34 @@ def generate_moves(players, how_many, game_id):
             w += letters[x]
         return w
 
-    print(str(players) + ", " + str(how_many) + ", " + str(game_id))
+    def random_card():
+        values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+        colours = ["Kier", "Karo", "Pik", "Trefl"]
+        v = np.random.randint(13)
+        c = np.random.randint(4)
+        return values[v] + " " + colours[c]
+
 
     moves = []
-    if game_id == 1:
+    winners = []
+    if game_id == 1 or game_id == 2:
         for i in range(how_many):
             moves.append(
                 [players[i % len(players)],
                  random_on_chessboard() + " " + random_on_chessboard()])
+        winners.append(players[np.random.randint(0, len(players))])
+    elif game_id == 4:
+        for i in range(how_many):
+            moves.append([players[i % len(players)], random_card()])
+        while len(winners) < 2:
+            w = players[np.random.randint(0, len(players))]
+            if players not in winners:
+                winners.append(w)
     else:
         for i in range(how_many):
             moves.append([players[i % len(players)],
                           random_placeholder_move_description()])
-    return moves
+    return winners, moves
 
 
 def simulate_game():
@@ -109,35 +124,19 @@ def simulate_game():
         if how_many_moves < 0:
             print("Moves number must be greater then 0")
 
-    moves = generate_moves(chosen_players, how_many_moves, int(game_id))
-    print(moves)
+    winners, moves = generate_results_and_moves(chosen_players,
+                                                how_many_moves, int(game_id))
 
     new_play_id = cursor.var(cx_Oracle.NUMBER)
     cursor.execute(insert_play, g_id=game_id, new_id=new_play_id)
-    print(new_play_id)
     new_play_id = int(new_play_id.getvalue()[0])
-    won = chosen_players[np.random.randint(0, len(chosen_players))]
     for p in chosen_players:
         cursor.execute(insert_playing, r_id=new_play_id, p_id=p,
-                       w=(int(p == won)))
+                       w=(int(p in winners)))
 
     no = 0
-    print("ruchy:")
-    print(moves)
-    print()
     for p, m in moves:
         no += 1
-        # print(new_play_id)
-        # print(p)
-        # print(no)
-        # print(m)
-        # print()
-        # cursor.execute("SELECT * FROM UDZIAL")
-        # print(cursor.fetchall())
-        # print()
-        # cursor.execute("SELECT * FROM RUCH")
-        # print(cursor.fetchall())
-        # print()
         cursor.execute(insert_move, r_id=new_play_id, p_id=p, numer=no, opis=m)
 
     connection.commit()
