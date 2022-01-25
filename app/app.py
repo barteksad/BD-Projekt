@@ -77,18 +77,28 @@ def get_game_info(connection, game_id):
 
 
 def get_game_ranking(connection, game_id, ranking_formula):
-    players_request = "SELECT grc.id, grc.nazwa , COUNT(DISTINCT win.id_rozgrywki), COUNT(DISTINCT loos.id_rozgrywki) FROM " \
-                      "GRACZ grc JOIN UDZIAL ud ON grc.id = ud.id_gracza " \
-                      "JOIN ROZGRYWKA ro ON ud.id_rozgrywki = ro.id " \
-                      "JOIN GRA gra ON ro.id_gry = gra.id " \
-                      "LEFT JOIN (SELECT id_rozgrywki, id_gracza FROM UDZIAL WHERE czy_wygral = 1) win ON win.id_gracza = grc.id " \
-                      "LEFT JOIN (SELECT id_rozgrywki, id_gracza FROM UDZIAL WHERE czy_wygral = 0) loos ON loos.id_gracza = grc.id " \
-                      "WHERE gra.id = :g_id GROUP BY grc.id, grc.nazwa"
+    # players_request = "SELECT grc.id, grc.nazwa , COUNT(DISTINCT win.id_rozgrywki), COUNT(DISTINCT loos.id_rozgrywki) FROM " \
+    #                   "GRACZ grc JOIN UDZIAL ud ON grc.id = ud.id_gracza " \
+    #                   "JOIN ROZGRYWKA ro ON ud.id_rozgrywki = ro.id " \
+    #                   "JOIN GRA gra ON ro.id_gry = gra.id " \
+    #                   "LEFT JOIN (SELECT id_rozgrywki, id_gracza FROM UDZIAL WHERE czy_wygral = 1) win ON win.id_gracza = grc.id " \
+    #                   "LEFT JOIN (SELECT id_rozgrywki, id_gracza FROM UDZIAL WHERE czy_wygral = 0) loos ON loos.id_gracza = grc.id " \
+    #                   "WHERE gra.id = :g_id GROUP BY grc.id, grc.nazwa"
 
+    players_request = " SELECT G.id, G.nazwa, SUM(U.czy_wygral), COUNT(*) - SUM(U.czy_wygral) " \
+                      " FROM GRACZ G " \
+                      " JOIN UDZIAL U  " \
+                      "     ON G.id = U.id_gracza " \
+                      " JOIN ROZGRYWKA R " \
+                      "     ON R.id = U.id_rozgrywki " \
+                      " WHERE R.id_gry = :g_id " \
+                      " GROUP BY(G.id, G.nazwa) "
+                      
     cursor = connection.cursor()
     eval_ranking = Parser().parse(ranking_formula)
     cursor.execute(players_request, g_id=game_id)
     data = np.array(cursor.fetchall())
+    print(data)
     if data.shape[0] == 0:
         return []
     ranking_points = [[eval_ranking.evaluate(
@@ -143,13 +153,14 @@ def play_stats(play_id):
 
 def get_player_games_history(connection, player_id):
     games_history_request = "WITH ROZGRYWKI AS ( " \
-                            "   SELECT id, id_gry FROM ROZGRYWKA " \
+                            "   SELECT id, id_gry, kiedy FROM ROZGRYWKA " \
                             "   JOIN UDZIAL ON id = id_rozgrywki " \
                             "   WHERE id_gracza = :p_id " \
                             ") " \
                             ", GRACZE AS ( " \
                             "    SELECT ROZGRYWKI.id, ROZGRYWKI.id_gry, UDZIAL.id_gracza, UDZIAL.czy_wygral FROM  ROZGRYWKI "\
-                            "    JOIN UDZIAL ON id = id_rozgrywki "\
+                            "    JOIN UDZIAL ON id = id_rozgrywki " \
+                            "    ORDER BY ROZGRYWKI.kiedy DESC " \
                             " ) " \
                             "SELECT GRACZE.id, GRA.nazwa, GRACZE.id_gracza, GRACZE.czy_wygral FROM " \
                             "GRACZE LEFT JOIN GRA ON GRACZE.id_gry = GRA.id "
