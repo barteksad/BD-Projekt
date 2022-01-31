@@ -3,3 +3,4 @@ venv
 app/__pycache__
 app/user_secrets.py
 nic
+DB_Projekt*

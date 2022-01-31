@@ -98,7 +98,7 @@ def get_game_ranking(connection, game_id, ranking_formula):
     eval_ranking = Parser().parse(ranking_formula)
     cursor.execute(players_request, g_id=game_id)
     data = np.array(cursor.fetchall())
-    print(data)
+
     if data.shape[0] == 0:
         return []
     ranking_points = [[eval_ranking.evaluate(
