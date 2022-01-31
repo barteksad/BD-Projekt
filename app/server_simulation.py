@@ -59,14 +59,14 @@ def generate_results_and_moves(players, how_many, game_id):
     elif game_id == 4:
         for i in range(how_many):
             moves.append([players[i % len(players)], random_card()])
-        while len(winners) < 2:
-            w = players[np.random.randint(0, len(players))]
-            if players not in winners:
-                winners.append(w)
+        w_index = np.random.randint(0, len(players))
+        winners.append(players[w_index])
+        winners.append(players[(w_index + 2) % len(players)])
     else:
         for i in range(how_many):
             moves.append([players[i % len(players)],
                           random_placeholder_move_description()])
+        winners.append(players[np.random.randint(0, len(players))])
     return winners, moves
 
 
