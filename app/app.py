@@ -300,10 +300,13 @@ def zmiana_formuly():
 
 
 def is_formula_valid(formula):
-    eval_ranking = Parser().parse(formula)
-
     try:
+        eval_ranking = Parser().parse(formula)
         eval_ranking.evaluate({'w': 123, "l": 321})
+        eval_ranking.evaluate({'w': 123, "l": 123})
+        eval_ranking.evaluate({'w': 0, "l": 123})
+        eval_ranking.evaluate({'w': 123, "l": 0})
+        eval_ranking.evaluate({'w': 0, "l": 0})
     except:
         return False
 
