@@ -129,8 +129,8 @@ def play_stats(play_id):
     players_links = [url_for('gracze_info', player_id=i)
                      for i in players_list[:, 0]]
 
-    winner_id = players_list[players_list[:, 1] == 1][0][0]
-    winner_link = url_for("gracze_info", player_id=winner_id)
+    winner_id = players_list[players_list[:, 1] == 1][:, 0]
+    winner_link = [url_for("gracze_info", player_id=w_id) for w_id in winner_id]
     players_list = players_list[:, 0]
 
     moves_query = "SELECT id_gracza, opis_ruchu FROM RUCH " \
@@ -174,15 +174,17 @@ def get_player_games_history(connection, player_id):
     for row in data:
         play_id, game_name, curr_player_id, has_won = row
         games_hist[(play_id, game_name)].append(curr_player_id)
+        if play_id not in games_wins.keys():
+            games_wins[play_id] = []
         if has_won == '1':
-            games_wins[play_id] = curr_player_id
+            games_wins[play_id].append(curr_player_id)
 
     data = []
     for (play_id, game_name), players_ids in games_hist.items():
         data.append((url_for("play_stats", play_id=play_id),
                      game_name,
                      "gracze : " + ", ".join([str(i) for i in players_ids]),
-                    'link-success' if games_wins[play_id] == player_id else 'link-danger'))
+                     'link-success' if player_id in games_wins[play_id] else 'link-danger'))
 
     return data
 

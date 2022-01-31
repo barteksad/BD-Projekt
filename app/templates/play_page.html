@@ -3,8 +3,8 @@
 <!-- game_name - nazwa gry -->
 <!-- game_link - link gry -->
 <!-- play_date - data gry -->
-<!-- winner_id - id zwycięscy -->
-<!-- winner_link - link zwycięscy -->
+<!-- winner_id - id zwycięzców -->
+<!-- winner_link - linki zwycięzców -->
 <!-- players_list - [id_gracza] -->
 <!-- players_links - linki graczy -->
 <!-- winner_link - link wygranego -->
@@ -13,14 +13,22 @@
 {% block content %}
 
 <div class="jumbotron">
-  <h3 class="display-4">Rozgrywka {{play_id}}</h3>
-  <p class="clickable" onclick="window.location.href='{{ game_link }}';">
-    gra : {{game_name}}
-  </p>
-  <p class="clickable" onclick="window.location.href='{{ winner_link }}';">
-    wygrany : {{winner_id}}
-  </p>
-  <p class="lead">data : {{play_date}}</p>
+    <h3 class="display-4">Rozgrywka {{play_id}}</h3>
+    <p class="clickable" onclick="window.location.href='{{ game_link }}';">
+        gra : {{game_name}}
+    </p>
+    <p>
+        wygrany/i :
+        {% for w_id in winner_id %}
+        <a href='{{ winner_link[loop.index - 1] }}' style="text-decoration: none;  color: black;">
+            {{w_id}}
+        </a>
+        {% if loop.index < winner_id|length %}
+        {{ ',' }}
+        {% endif %}
+        {% endfor %}
+    </p>
+    <p class="lead">data : {{play_date}}</p>
 </div>
 
 <div class="row">
@@ -55,6 +63,7 @@
         </tr>
         </thead>
         <tbody>
+        <tr>
         {% for row in moves %}
             {% for element in row %}
             <td>{{ element }}</td>
